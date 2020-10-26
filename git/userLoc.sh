@@ -46,8 +46,14 @@ FINAL_SCC_C=""
 FINAL_SCC_CPPHEADER=""
 COLUMN_NAME=`scc --include-ext=js,ts,cpp,h,hpp,c,mm | awk -v OFS='\t' '/Language/ {print $1,$2,$3,$4,$5,$6,$7}'`
 
+COUNT_LINE=`echo $RESULT | wc -w`
+CURR_LINE=1
 for line in $RESULT
 do
+	VAL=`echo "$CURR_LINE/$COUNT_LINE*100" | bc -l`
+	printf "\r%.0f%%" $VAL
+	CURR_LINE=$((CURR_LINE+1))
+
 	git checkout "$line~1" 2>/dev/null
 	BEFORE_SCC=$(scc --include-ext=js,ts,cpp,h,hpp,c,mm 2>/dev/null)
 	git checkout "$line" 2>/dev/null
@@ -77,7 +83,7 @@ do
 	FINAL_SCC_C=`echo "$FINAL_SCC_C\n$DIFF_C" | awk -v OFS='\t' 'NR==1{old2=$2; old3=$3; old4=$4; old5=$5; old6=$6; old7=$7; next;}{print $1, $2+old2, $3+old3, $4+old4, $5+old5, $6+old6, $7+old7}'`
 	FINAL_SCC_CPPHEADER=`echo "$FINAL_SCC_CPPHEADER\n$DIFF_CPPHEADER" | awk -v OFS='\t' 'NR==1{old2=$2; old3=$3; old4=$4; old5=$5; old6=$6; old7=$7; next;}{print $1, $2+old2, $3+old3, $4+old4, $5+old5, $6+old6, $7+old7}'`
 done
-
+printf "\n"
 git checkout $CURRENT_BRANCH 2>/dev/null
 FINAL_DATA=`echo "$COLUMN_NAME\n$FINAL_SCC_JS\n$FINAL_SCC_TS\n$FINAL_SCC_CHEADER\n$FINAL_SCC_CPP\n$FINAL_SCC_OBJECTIVEC\n$FINAL_SCC_C\n$FINAL_SCC_CPPHEADER"`
 SEPERATOR="------ ------ ------ ------ ------ ------ ------"
