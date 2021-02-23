@@ -1,3 +1,4 @@
+
 #custom aliases
 alias reload="source ~/.zshrc"
 alias gs="git status"
